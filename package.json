@@ -1,0 +1,27 @@
+{
+  "name": "nft-recommendation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "cd artifacts && npm run compile",
+    "check": "cd artifacts && npm run check",
+    "deploy": "cd artifacts && npm run deploy",
+    "clean": "as-stylus clean"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "build/release.js",
+      "types": "build/release.d.ts"
+    }
+  },
+  "dependencies": {
+    "@wakeuplabs/as-stylus": "0.1.12"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.27.35"
+  }
+}
