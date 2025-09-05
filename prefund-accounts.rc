@@ -1,0 +1,7 @@
+#!/usr/bin/env -S rc -e
+
+addrs=(0x01f1854c91271cefc89b59b86a93d219944e50b7 0x7883bded46971c5c56fd0adff5c1258c0e8ebfae 0xb2f525fdcbf0fe5909155a57ead4ff95be672ca3 0x33485e6a83f465bb10ed450c99761cb27f6cbea7)
+
+url=https://testnet-rpc.superposition.so
+
+for(p in $addrs) cast send --private-key $SPN_SUPERPOSITION_KEY --rpc-url $url --value 0.001ether $a

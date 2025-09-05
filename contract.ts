@@ -24,26 +24,15 @@ class TooHighScore {
 
 @Contract
 export class NftRecommendation {
-  static owner: Address;
-  static nftCount: U256;
   static influencerCount: U256;
   static influencers: Mapping<U256, Address>;
   static scores: MappingNested<U256, U256, U256>;
   static opinions: MappingNested<Address, U256, U256>;
 
-  static constructor(o: Address) {
-      owner = o;
-  }
-
-  @External
-  static setCount(count: U256) {
-    nftCount.set(count);
-  }
-
   @Internal
   @Pure
   static requireNftCountScore(i: U256, score: U256): void {
-    if (i > nftCount) {
+    if (i > U256Factory.fromString("10")) {
       TooHighNft.revert(i);
     }
     if (score > U256Factory.fromString("10")) {
@@ -97,7 +86,7 @@ export class NftRecommendation {
     let topScore = U256Factory.create();
     for (let influencerI = zero; influencerI < influencerCount; influencerI = influencerI.add(one)) {
       let sum = U256Factory.create();
-      for (let nftI = zero; nftI < nftCount; nftI = nftI.add(one)) {
+      for (let nftI = zero; nftI < U256Factory.fromString("10"); nftI = nftI.add(one)) {
         const influencerScore = scores.get(influencerI, nftI);
         const userScore = opinions.get(user, nftI);
         sum = sum.add(pow(influencerScore.sub(userScore), two));

@@ -1,0 +1,48 @@
+#!/usr/bin/env rc
+
+url=https://testnet-rpc.superposition.so
+
+c=0x5eff8e67094056fb9ac3ad3f68704a094fe3bb98
+
+if(~ 0 $#SPN_SUPERPOSITION_KEY) {
+	echo SPN_SUPERPOSITION_KEY unset >[1=2]
+	exit 1
+}
+
+hunter=3290f85e5ad306e1730c5427352f60ac27e5af529973220bf0c5fc34be3b317e
+ivan=859fc976f64a40a3a54f360174620a9b1bd2104ea6c585faf71821e78ca20c58
+churro=a48ef7185e242564750f3b1fb564df4491738ea4953d1859c20f747f879a640b
+marko=5da0d081edf2e9bfbe73aa2491ca42f6af565668f2dce3121d4f74408711bcec
+
+#nfts=('CryptoPunks' 'Bored Ape Yacht Club' 'Infinex Patrons' 'Pudgy Penguins' 'Chromie Squiggle by Snowfro' Autoglyphs 'Fidenza by Tyler Hobbs' Moonbirds 'Lil Pudgys')
+ids=(0 1 2 3 4 5 6 7 8)
+
+fn make_recommendation {
+	key=$1
+	id=$2
+	score=$3
+	cast send -q --private-key $key --rpc-url $url $c 'registerInfluencer(uint256,uint256)' $id $score
+}
+
+scores_hunter=(8 4 2 7 6 8 9 5 0)
+scores_ivan=(3 3 1 7 6 0 3 9 3)
+scores_churro=(6 9 3 3 2 5 3 5 7)
+scores_marko=(9 6 9 9 0 1 5 6 3)
+
+{ for(s in `{seq $#ids}) make_recommendation $hunter $ids($s) $scores_hunter($s) } &
+{ for(s in `{seq $#ids}) make_recommendation $ivan $ids($s) $scores_ivan($s) } &
+{ for(s in `{seq $#ids}) make_recommendation $churro $ids($s) $scores_churro($s) } &
+{ for(s in `{seq $#ids}) make_recommendation $marko $ids($s) $scores_marko($s) } &
+
+wait
+
+scores_erik=(8 2 0 8 0 0 0 6 9)
+
+for(i in `{seq $#scores_erik}) \
+	cast send \
+		--private-key $SPN_SUPERPOSITION_KEY \
+		--rpc-url $url \
+		$c \
+		'registerUser(uint256,uint256)' \
+		$ids($i) \
+		$scores_erik($i)
