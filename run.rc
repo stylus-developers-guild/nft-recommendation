@@ -4,6 +4,11 @@ url=https://testnet-rpc.superposition.so
 
 c=0x5eff8e67094056fb9ac3ad3f68704a094fe3bb98
 
+if(~ 0 $#SPN_SUPERPOSITION_ADDR) {
+	echo SPN_SUPERPOSITION_ADDR unset >[1=2]
+	exit 1
+}
+
 if(~ 0 $#SPN_SUPERPOSITION_KEY) {
 	echo SPN_SUPERPOSITION_KEY unset >[1=2]
 	exit 1
@@ -40,9 +45,12 @@ scores_erik=(8 2 0 8 0 0 0 6 9)
 
 for(i in `{seq $#scores_erik}) \
 	cast send \
+		-q \
 		--private-key $SPN_SUPERPOSITION_KEY \
 		--rpc-url $url \
 		$c \
 		'registerUser(uint256,uint256)' \
 		$ids($i) \
 		$scores_erik($i)
+
+cast call --rpc-url $url $c 'getScore(address)(address)' $SPN_SUPERPOSITION_ADDR
