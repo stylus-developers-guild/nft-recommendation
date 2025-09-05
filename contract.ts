@@ -69,9 +69,9 @@ export class NftRecommendation {
   @Pure
   static pow(x: U256, y: U256): U256 {
     const one = U256Factory.fromString("1");
-    let acc = U256Factory.create();
+    let acc = U256Factory.fromString("1");
     for (let i = U256Factory.create(); i < y; i = i.add(one)) {
-      acc = acc.mul(acc);
+      acc = acc.mul(x);
     }
     return acc;
   }
