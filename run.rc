@@ -2,7 +2,7 @@
 
 url=https://testnet-rpc.superposition.so
 
-c=0xec624903205b60207ef18e6a916e75f98c4238cd
+c=$1
 
 if(~ 0 $#SPN_SUPERPOSITION_ADDR) {
 	echo SPN_SUPERPOSITION_ADDR unset >[1=2]
