@@ -7,9 +7,10 @@ export class InfluencerRegistered {
 
 @Event
 export class ScoreSet {
-  @Indexed scorer;
-  @Indexed nft;
-  @Indexed score;
+  @Indexed scorer: Address;
+  @Indexed nft: U256;
+  @Indexed score: U256;
+  pos: U256;
 }
 
 @Error
@@ -25,7 +26,8 @@ class TooHighScore {
 @Contract
 export class NftRecommendation {
   static influencerCount: U256;
-  static influencers: Mapping<U256, Address>;
+  static influencerIds: Mapping<Address, U256>;
+  static influencerAddrs: Mapping<U256, Address>;
   static scores: MappingNested<U256, U256, U256>;
   static opinions: MappingNested<Address, U256, U256>;
 
@@ -46,17 +48,26 @@ export class NftRecommendation {
   }
 
   @External
+  static getInfluencerCount(): U256 {
+    return influencerCount;
+  }
+
+  @External
+  static getInfluencerNo(addr: Address): U256 {
+    return scores.get(influencerCount.get(addr));
+  }
+
+  @External
   static registerInfluencer(i: U256, score: U256): void {
     requireNftCountScore(i, score);
-    let influencerNo = influencers.get(msg.sender);
-    if (influencerNo == U256Factory.create()) {
+    if (influencerIds.get(msg.sender) == U256Factory.create()) {
       influencerCount = influencerCount.add(U256Factory.fromString("1"));
-      influencerNo = influencerCount;
+      influencerIds.set(msg.sender, influencerCount);
+      influencerAddrs.set(influencerCount, msg.sender);
       InfluencerRegistered.emit(msg.sender);
     }
-    ScoreSet.emit(msg.sender, i, score);
-    scores.set(influencerNo, i, score);
-    influencerCount = influencerCount.add(U256Factory.fromString("1"));
+    ScoreSet.emit(msg.sender, i, score, influencerCount);
+    scores.set(influencerIds.get(msg.sender), i, score);
   }
 
   @External
@@ -82,20 +93,23 @@ export class NftRecommendation {
     const zero = U256Factory.create();
     const one = U256Factory.fromString("1");
     const two = U256Factory.fromString("2");
-    let topAddr = U256Factory.create();
+    let topId = influencerIds.get(zero);
     let topScore = U256Factory.create();
-    for (let influencerI = zero; influencerI < influencerCount; influencerI = influencerI.add(one)) {
+    for (let influencerI = one; influencerI <= influencerCount; influencerI = influencerI.add(one)) {
       let sum = U256Factory.create();
       for (let nftI = zero; nftI < U256Factory.fromString("10"); nftI = nftI.add(one)) {
         const influencerScore = scores.get(influencerI, nftI);
         const userScore = opinions.get(user, nftI);
-        sum = sum.add(pow(influencerScore.sub(userScore), two));
+        let abs = U256Factory.create();
+        if (influencerScore > userScore) abs = influencerScore.sub(userScore);
+        else userScore.sub(influencerScore);
+        sum = sum.add(pow(abs, two));
       }
       if (sum > topScore) {
-        topAddr = influencerI;
+        topId = influencerI;
         topScore = sum;
       }
     }
-    return influencers.get(topAddr);
+    return influencerAddrs.get(topId);
   }
 }

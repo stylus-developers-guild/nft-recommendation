@@ -1,0 +1,3 @@
+#!/usr/bin/env rc
+
+npx @wakeuplabs/as-stylus compile contract.ts
