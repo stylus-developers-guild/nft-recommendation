@@ -57,18 +57,18 @@ export class NftRecommendation {
     return scores.get(influencerCount.get(addr));
   }
 
-  @External
-  static registerInfluencer(i: U256, score: U256): void {
-    requireNftCountScore(i, score);
-    if (influencerIds.get(msg.sender) == U256Factory.create()) {
-      influencerCount = influencerCount.add(U256Factory.fromString("1"));
-      influencerIds.set(msg.sender, influencerCount);
-      influencerAddrs.set(influencerCount, msg.sender);
-      InfluencerRegistered.emit(msg.sender);
-    }
-    ScoreSet.emit(msg.sender, i, score, influencerCount);
-    scores.set(influencerIds.get(msg.sender), i, score);
+@External
+static registerInfluencer(i: U256, score: U256): void {
+  requireNftCountScore(i, score);
+  if (influencerIds.get(msg.sender) == U256Factory.create()) {
+    influencerCount = influencerCount.add(U256Factory.fromString("1"));
+    influencerIds.set(msg.sender, influencerCount);
+    influencerAddrs.set(influencerCount, msg.sender);
+    InfluencerRegistered.emit(msg.sender);
   }
+  ScoreSet.emit(msg.sender, i, score, influencerCount);
+  scores.set(influencerIds.get(msg.sender), i, score);
+}
 
   @External
   static registerUser(i: U256, opinion: U256): void {
@@ -93,8 +93,8 @@ export class NftRecommendation {
     const zero = U256Factory.create();
     const one = U256Factory.fromString("1");
     const two = U256Factory.fromString("2");
-    let topId = influencerIds.get(zero);
-    let topScore = U256Factory.create();
+    let topId = zero;
+    let topScore = zero;
     for (let influencerI = one; influencerI <= influencerCount; influencerI = influencerI.add(one)) {
       let sum = U256Factory.create();
       for (let nftI = zero; nftI < U256Factory.fromString("10"); nftI = nftI.add(one)) {
@@ -102,10 +102,10 @@ export class NftRecommendation {
         const userScore = opinions.get(user, nftI);
         let abs = U256Factory.create();
         if (influencerScore > userScore) abs = influencerScore.sub(userScore);
-        else userScore.sub(influencerScore);
+        else abs = userScore.sub(influencerScore);
         sum = sum.add(pow(abs, two));
       }
-      if (sum > topScore) {
+      if (topScore == zero || topScore > sum) {
         topId = influencerI;
         topScore = sum;
       }
